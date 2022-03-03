@@ -1,4 +1,4 @@
-import { faPen, faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { authService, dbService, storageService } from "fbase";
 import React, { useEffect, useState } from "react";
@@ -8,16 +8,16 @@ import { v4 as uuidv4 } from "uuid";
 export default ({ refreshUser, setUserObj, userObj }) => {
   const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
   const [profileImage, setProfileImage] = useState("");
-  const getProfileImage = async () => {
-    const attachmentRef = storageService
-      .ref()
-      .child(`profiles/${userObj.uid}/${uuidv4()}`);
-    const response = await attachmentRef.putString(attachmentRef, "data_url");
-  }
-  useEffect(() => {
-    getProfileImage();
-  }, [])
   const history = useHistory();
+  useEffect(async () => {
+    const profile = await dbService
+      .collection("profiles")
+      .where("uId", "==", userObj.uid)
+      .get();
+    if(profile.docs.length > 0) {
+      setProfileImage(profile.docs[0].data().attachmentUrl);
+    }
+  }, [])
   const onLogOutClick = () => {
     authService.signOut();
     setUserObj((prev) => !prev);
@@ -45,6 +45,28 @@ export default ({ refreshUser, setUserObj, userObj }) => {
   }, []);
   const onSubmit = async (event) => {
     event.preventDefault();
+    let attachmentUrl = "";
+    if(profileImage !== "") {
+      const attachmentRef = storageService
+        .ref()
+        .child(`profiles/${userObj.uid}/${uuidv4()}`);
+      const response = await attachmentRef.putString(profileImage, "data_url");
+      attachmentUrl = await response.ref.getDownloadURL();
+      const profileObj = {
+        createdAt: Date.now(),
+        uId: userObj.uid,
+        attachmentUrl: attachmentUrl
+      }
+      const prevProfile = await dbService
+        .collection("profiles")
+        .where("uId", "==", userObj.uid)
+        .get();
+      if(prevProfile.docs.length > 0) {
+        await dbService.doc(`profiles/${prevProfile.docs[0].id}`).update(profileObj);
+      } else {
+        await dbService.collection("profiles").add(profileObj);
+      }
+    }
     if(userObj.displayName !== newDisplayName) {
       await userObj.updateProfile({
         displayName: newDisplayName
@@ -59,10 +81,10 @@ export default ({ refreshUser, setUserObj, userObj }) => {
      const theFile = files[0];
      const reader = new FileReader();
      reader.onloadend = (finishedEvent) => {
-      const {
-        target: { result }
-      } = finishedEvent;
-      setProfileImage(result);
+        const { 
+          currentTarget: { result } 
+        } = finishedEvent;
+        setProfileImage(result);
      }
      reader.readAsDataURL(theFile);
   }
