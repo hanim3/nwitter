@@ -1,9 +1,22 @@
-import { authService, dbService } from "fbase";
+import { faPen, faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { authService, dbService, storageService } from "fbase";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 
 export default ({ refreshUser, setUserObj, userObj }) => {
   const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
+  const [profileImage, setProfileImage] = useState("");
+  const getProfileImage = async () => {
+    const attachmentRef = storageService
+      .ref()
+      .child(`profiles/${userObj.uid}/${uuidv4()}`);
+    const response = await attachmentRef.putString(attachmentRef, "data_url");
+  }
+  useEffect(() => {
+    getProfileImage();
+  }, [])
   const history = useHistory();
   const onLogOutClick = () => {
     authService.signOut();
@@ -39,18 +52,85 @@ export default ({ refreshUser, setUserObj, userObj }) => {
       refreshUser();
     }
   }
+  const onattachmentChange = (event) => {
+    const { 
+      target: { files }
+     } = event;
+     const theFile = files[0];
+     const reader = new FileReader();
+     reader.onloadend = (finishedEvent) => {
+      const {
+        target: { result }
+      } = finishedEvent;
+      setProfileImage(result);
+     }
+     reader.readAsDataURL(theFile);
+  }
+  const onClearAttachmentClick = () => setProfileImage("");
   return (
-    <>
-      <form onSubmit={onSubmit}>
+    <div className="container">
+      <form onSubmit={onSubmit} className="profileForm">
+        <div className="factoryImage__container">
+          <div className="factoryForm__attachment">
+            {profileImage ? (
+              <>
+                <img 
+                  src={profileImage} 
+                  style={{
+                    backgroundImage: profileImage,
+                  }}
+                />
+                <div className="factoryForm__clear" onClick={onClearAttachmentClick}>
+                  <FontAwesomeIcon icon={faTimes} />
+                </div>
+              </>
+            ) : (
+              <img 
+                src= "http://www.gravatar.com/avatar/3b3be63a4c2a439b013787725dfce802?d=identicon"
+                className="factoryForm__defaultImage"
+              />
+            )}
+              <div class="EditProfile__icon">
+              <label for="attach-file" className="factoryInput__label">
+                <FontAwesomeIcon icon={faPen} />
+              </label>
+              <input 
+                id="attach-file"
+                type="file" 
+                accept="image/*" 
+                onChange={onattachmentChange} 
+                style={{
+                  opacity: 0,
+                  width: "100%",
+                  height: "100%",
+                  position: "absolute",
+                  top: 0,
+                  left: 0
+                }}
+              />
+            </div>
+          </div>
+        </div>
         <input 
           type="text"
+          autoFocus
           placeholder="Display name" 
           onChange={onChange}
           value={newDisplayName}
+          className="formInput"
         />
-        <input type="submit" value="Update Profile" />
+        <input 
+          type="submit" 
+          value="Update Profile"
+          className="formBtn"
+          style={{
+            marginTop: 10,
+          }}
+        />
       </form>
-      <button onClick={onLogOutClick}>Log Out</button>
-    </>
+      <span className="formBtn cancelBtn logOut" onClick={onLogOutClick}>
+        Log Out
+      </span>
+    </div>
   )
 };

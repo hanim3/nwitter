@@ -20,6 +20,8 @@ function App() {
             displayName: email.split('@')[0],
           });
         }
+      } else {
+        setUserObj(null);
       }
       setInit(true);
     });
