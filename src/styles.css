@@ -1,13 +1,13 @@
 @import "https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css";
 
-* {
+input {
+  all: unset;
+  appearance: none;
   box-sizing: border-box;
 }
 
-input {
-  all: unset;
+* {
   box-sizing: border-box;
-  appearance: none;
 }
 
 body {
@@ -68,6 +68,34 @@ form {
 .cancelBtn {
   cursor: pointer;
   background-color: tomato;
+}
+
+/* Auth */
+.authContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.authBtns {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 320px;
+}
+
+.authBtn {
+  cursor: pointer;
+  border-radius: 20px;
+  border: none;
+  padding: 10px 0px;
+  font-size: 12px;
+  text-align: center;
+  width: 150px;
+  background: white;
+  cursor: pointer;
 }
 
 /* AuthForm */
@@ -146,6 +174,7 @@ form {
   text-align: center;
   border-radius: 20px;
   color: white;
+  box-sizing: border-box;
 }
 
 .factoryInput__label {
