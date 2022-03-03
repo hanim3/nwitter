@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 const Navigation = ({ userObj }) => {
   return (
     <nav>
-      <ul style={{ display: "flex", jusifyContent: "center", marginTop: 50 }}>
+      <ul style={{ display: "flex", justifyContent: "center", marginTop: 50 }}>
         <li>
           <Link to="/" style={{ marginRight: 10 }}>
             <FontAwesomeIcon icon={faTwitter} color={"#04AAFF"} size="2x" />
