@@ -1,12 +1,12 @@
 @import "https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css";
 
-input {
-  all: unset;
-  appearance: none;
+* {
   box-sizing: border-box;
 }
 
-* {
+input {
+  all: unset;
+  appearance: none;
   box-sizing: border-box;
 }
 
